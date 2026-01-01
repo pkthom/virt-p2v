@@ -25,10 +25,33 @@ CentOS6.10は、/ に40GB残ってる
 
 
 
-### P2V対象側チェック
+### P2V対象側()チェック
 
 - ✅KVMホスト(CentOS6.10)にパスワードなしでSSHできる
+
+<img width="649" height="267" alt="image" src="https://github.com/user-attachments/assets/c8a07bef-5eaf-41a8-b7cd-012f263f2180" />
+
 
 - ✖virt-p2vが入っている -> 入ってない
 
 <img width="900" height="128" alt="image" src="https://github.com/user-attachments/assets/84fd799c-4426-4b8a-b13c-acb733c650e4" />
+
+### virt-v2v実施側チェック(RHEL10)
+
+- ✅KVMホスト(CentOS6.10)にパスワードなしでSSHできる
+
+```
+Host centos6-8300
+    HostName 10.20.30.40
+    User root
+    IdentityFile ~/.ssh/id_rsa_centos6
+    Port 22
+    HostKeyAlgorithms +ssh-rsa
+    PubkeyAcceptedAlgorithms +ssh-rsa
+    IdentitiesOnly yes
+    ServerAliveInterval 60
+```
+鍵はわざと古い形式で作らないと受け入れてくれない
+```
+ssh-keygen -t rsa -b 4096 -f ./id_rsa_centos6
+```
