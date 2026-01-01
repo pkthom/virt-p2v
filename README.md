@@ -70,6 +70,10 @@ root@localhost:/etc/ssh/sshd_config.d#
 
 <img width="358" height="30" alt="image" src="https://github.com/user-attachments/assets/f839e7b4-349d-4795-a5a2-19a9210d8371" />
 
+※CentOS5側のconfigは、centos6-8300用のものと同じ
+
+<img width="466" height="365" alt="image" src="https://github.com/user-attachments/assets/508d2f09-5b55-477c-9974-f6d791f1e09c" />
+
 
 - ✖virt-p2vが入っている -> 入ってない
 
