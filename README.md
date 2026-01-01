@@ -25,11 +25,50 @@ CentOS6.10は、/ に40GB残ってる
 
 
 
-### P2V対象側()チェック
+### P2V対象側(CentOS5.11)チェック
 
 - ✅KVMホスト(CentOS6.10)にパスワードなしでSSHできる
 
 <img width="649" height="267" alt="image" src="https://github.com/user-attachments/assets/c8a07bef-5eaf-41a8-b7cd-012f263f2180" />
+
+- ✖virt-v2vホスト(RHEL10)にパスワードなしでSSHできる　→　できない no kex alg　
+
+<img width="453" height="49" alt="image" src="https://github.com/user-attachments/assets/29824bb4-dadf-40d7-8996-e36184cdec64" />
+
+-> 物理マシン側のSSHが古すぎる 
+
+RHEL 9や10では、セキュリティを確保するために古い暗号がシステムレベルで封じられています。これを一時的に解除します。（以下をRHEL10で実行）
+```
+ubuntu@localhost:~$ sudo update-crypto-policies --set LEGACY
+[sudo] ubuntu のパスワード:
+Setting system policy to LEGACY
+Note: System-wide crypto policies are applied on application start-up.
+It is recommended to restart the system for the change of policies
+to fully take place.
+ubuntu@localhost:~$
+```
+※⚠上記だけでは解決せず、以下が必要になるが、上記がないと、以下をやっても　no kex algが出るので、上記は必要です
+
+まだSSHできない　エラーが変わる　no hostkey alg
+
+<img width="402" height="50" alt="image" src="https://github.com/user-attachments/assets/53363771-5a90-4395-a55e-e404cd1e2d89" />
+
+```
+root@localhost:/etc/ssh/sshd_config.d# cat 05-hostkey-legacy.conf
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKeyAlgorithms +ssh-rsa
+root@localhost:/etc/ssh/sshd_config.d# cat 10-centos5-compat.conf
+Match Address <<CentOS5.11のIPアドレス>>
+    PubkeyAcceptedAlgorithms +ssh-rsa
+root@localhost:/etc/ssh/sshd_config.d# sshd -t
+root@localhost:/etc/ssh/sshd_config.d# systemctl restart sshd
+root@localhost:/etc/ssh/sshd_config.d#
+```
+-> SSHできるようになるので、鍵を置く
+
+✅パスワードなしでSSHできるようになった
+
+<img width="358" height="30" alt="image" src="https://github.com/user-attachments/assets/f839e7b4-349d-4795-a5a2-19a9210d8371" />
 
 
 - ✖virt-p2vが入っている -> 入ってない
@@ -94,9 +133,10 @@ sudo subscription-manager repos \
 
 virt-v2v / libguestfs をインストール
 ```
-sudo dnf -y install \
-  virt-v2v libguestfs-tools-c libvirt-client qemu-img nbdkit
+sudo dnf -y install virt-v2v libguestfs-tools-c libvirt-client
 ```
+<img width="722" height="212" alt="image" src="https://github.com/user-attachments/assets/41c7ed7e-9ce9-48ad-b4cc-b6809dda1c70" />
+
 
 ✅インストールできたことを確認
 ```
@@ -104,3 +144,6 @@ virt-v2v --version
 guestfish --version
 ```
 <img width="658" height="248" alt="image" src="https://github.com/user-attachments/assets/59fcb7ae-5cbc-4322-9147-8e88d41a43e1" />
+
+
+
