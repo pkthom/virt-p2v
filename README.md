@@ -55,3 +55,52 @@ Host centos6-8300
 ```
 ssh-keygen -t rsa -b 4096 -f ./id_rsa_centos6
 ```
+
+## RHEL10に変換ツールを入れる
+
+最初は入ってない
+
+<img width="706" height="116" alt="image" src="https://github.com/user-attachments/assets/e73b9905-b896-470f-a2fc-3799219f6b44" />
+
+登録がないと、レポジトリが使えない
+
+<img width="1576" height="251" alt="image" src="https://github.com/user-attachments/assets/4e0f4acf-ef11-4dc2-b68b-8f54b3f1e1d3" />
+
+以下で登録
+```
+sudo subscription-manager register --username 'ユーザー名' --password 'パスワード'
+```
+
+✅登録済みなことを確認
+
+<img width="727" height="222" alt="image" src="https://github.com/user-attachments/assets/ceb1d10e-5875-423a-a1ed-68025e780eaf" />
+
+こちらでも確認
+```
+sudo subscription-manager identity || true
+```
+
+BaseOS/AppStream を有効化
+```
+sudo subscription-manager repos \
+  --enable=rhel-10-for-x86_64-baseos-rpms \
+  --enable=rhel-10-for-x86_64-appstream-rpms
+```
+<img width="1178" height="168" alt="image" src="https://github.com/user-attachments/assets/8803f03a-11a8-4bb6-80bc-015648202198" />
+
+✅有効になったことを確認
+
+<img width="1448" height="225" alt="image" src="https://github.com/user-attachments/assets/934956a9-b491-4873-b8c5-6ac420be7d2a" />
+
+virt-v2v / libguestfs をインストール
+```
+sudo dnf -y install \
+  virt-v2v libguestfs-tools-c libvirt-client qemu-img nbdkit
+```
+
+✅インストールできたことを確認
+```
+virt-v2v --version
+guestfish --version
+```
+<img width="658" height="248" alt="image" src="https://github.com/user-attachments/assets/59fcb7ae-5cbc-4322-9147-8e88d41a43e1" />
