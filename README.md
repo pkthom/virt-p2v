@@ -353,3 +353,46 @@ ubuntu@rhel10:~$ sudo virt-p2v-make-disk --output /tmp/virt-p2v.iso fedora-42
                     Free space: 2.5G (42%)
 ubuntu@rhel10:~$
 ```
+
+
+
+## パフォーマンステスト
+
+### p2v前
+
+### 書き込みテスト
+```
+sync
+time dd if=/dev/zero of=/root/dd_test.bin bs=1M count=8192 oflag=direct conv=fdatasync
+rm -f /root/dd_test.bin
+```
+※解説
+```
+if=/dev/zero: 入力元。中身がゼロの無限データを読み込みます。
+of=/root/dd_test.bin: 出力先。/root ディレクトリにテスト用の大きなファイルを作ります。
+bs=1M: ブロックサイズ。1回につき 1MB ずつ書き込みます。
+count=1024: 回数。8192回繰り返すので、合計 8GB のファイルを書き込むことになります。
+conv=fdatasync: 重要。 OSのキャッシュ（メモリ）に書き込んだ時点で「終わり」とせず、物理的なディスクにデータが書き込まれるまで待機します。これにより、本当のディスク性能が測れます。
+```
+※sync -> OSがメモリ上に溜めている「未書き込みデータ（dirty page）」をディスクへ書き出させる
+
+<img width="1204" height="726" alt="image" src="https://github.com/user-attachments/assets/88866108-4441-419d-8c75-875d78aced43" />
+<img width="1202" height="483" alt="image" src="https://github.com/user-attachments/assets/e570b58f-f263-4aa6-936b-4ab7b33a8b98" />
+
+### 読み取りテスト
+```
+sync
+echo 3 > /proc/sys/vm/drop_caches
+time dd if=/root/dd_test.bin of=/dev/null bs=1M iflag=direct status=progress
+```
+※`echo 3 > /proc/sys/vm/drop_caches` -> Linuxのページキャッシュ等（読み込みキャッシュ）を捨てる
+
+<img width="1146" height="723" alt="image" src="https://github.com/user-attachments/assets/d7f419d3-5aca-42d7-858f-ac4d67612212" />
+<img width="920" height="483" alt="image" src="https://github.com/user-attachments/assets/a7b25e2a-dbde-4747-90d0-199690711d18" />
+
+## 内容テスト
+
+マーカー作成
+
+<img width="855" height="78" alt="image" src="https://github.com/user-attachments/assets/7cc3f85a-dabe-4702-a675-82939e7509e0" />
+<img width="1021" height="128" alt="image" src="https://github.com/user-attachments/assets/eef401a2-2645-4f1e-87bd-0bf12da5f8e1" />
