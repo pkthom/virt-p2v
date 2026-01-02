@@ -354,7 +354,74 @@ ubuntu@rhel10:~$ sudo virt-p2v-make-disk --output /tmp/virt-p2v.iso fedora-42
 ubuntu@rhel10:~$
 ```
 
+ProxmoxにUSB
 
+RHEL10 VMを選んで、画像の通りUSBを認識させる
+
+<img width="874" height="720" alt="image" src="https://github.com/user-attachments/assets/d9ed07c8-d80d-4a2a-a2b6-c7febe29f133" />
+
+追加できた
+
+<img width="773" height="411" alt="image" src="https://github.com/user-attachments/assets/f205cad3-35ac-40a5-abdf-e55a61bb9330" />
+
+/dev/sdb としてUSBが追加されている
+```
+ubuntu@rhel10:~$ lsblk -o NAME,SIZE,MODEL,TRAN,TYPE,MOUNTPOINT
+NAME           SIZE MODEL          TRAN   TYPE MOUNTPOINT
+sda             80G QEMU HARDDISK         disk
+├─sda1         600M                       part /boot/efi
+├─sda2           1G                       part /boot
+└─sda3        78.4G                       part
+  ├─rhel-root 47.4G                       lvm  /
+  ├─rhel-swap  7.9G                       lvm  [SWAP]
+  └─rhel-home 23.1G                       lvm  /home
+sdb           28.9G USB Flash Disk usb    disk
+└─sdb1        28.9G                       part
+sr0            7.9G QEMU DVD-ROM   sata   rom
+ubuntu@rhel10:~$
+```
+
+念のためマウント解除
+```
+ubuntu@rhel10:~$ lsblk -f /dev/sdb
+NAME   FSTYPE FSVER LABEL UUID                                 FSAVAIL FSUSE% MOUNTPOINTS
+sdb
+└─sdb1 vfat   FAT32       4703-6FEC
+ubuntu@rhel10:~$ sudo umount /dev/sdb1 2>/dev/null || true
+[sudo] ubuntu のパスワード:
+ubuntu@rhel10:~$
+```
+書き込み
+```
+ubuntu@rhel10:~$ sudo dd if=/tmp/virt-p2v.iso of=/dev/sdb bs=4M status=progress conv=fsync
+6438256640 bytes (6.4 GB, 6.0 GiB) copied, 590 s, 10.9 MB/s6442450944 bytes (6.4 GB, 6.0 GiB) copied, 590.915 s, 10.9 MB/s
+
+1536+0 records in
+1536+0 records out
+6442450944 bytes (6.4 GB, 6.0 GiB) copied, 769.571 s, 8.4 MB/s
+ubuntu@rhel10:~$ 
+```
+簡易チェック
+```
+ubuntu@rhel10:~$  sudo cmp -n 64M /tmp/virt-p2v.iso /dev/sdb && echo "OK: first 64MB match"
+OK: first 64MB match
+ubuntu@rhel10:~$
+```
+抜く準備　VMからマウントポイントなし　
+```
+ubuntu@rhel10:~$ sync
+ubuntu@rhel10:~$ lsblk -o NAME,MOUNTPOINT /dev/sdb
+NAME   MOUNTPOINT
+sdb
+├─sdb1
+├─sdb2
+└─sdb3
+ubuntu@rhel10:~$
+```
+
+VMからUSBをデタッチ
+
+<img width="782" height="548" alt="image" src="https://github.com/user-attachments/assets/bdbece62-dfec-4d1b-89f9-bca605b9a45d" />
 
 ## パフォーマンステスト
 
