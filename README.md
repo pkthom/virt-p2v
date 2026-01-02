@@ -53,6 +53,7 @@ ubuntu@localhost:~$
 
 <img width="402" height="50" alt="image" src="https://github.com/user-attachments/assets/53363771-5a90-4395-a55e-e404cd1e2d89" />
 
+以下をRHEL10で実行
 ```
 root@localhost:/etc/ssh/sshd_config.d# cat 05-hostkey-legacy.conf
 HostKey /etc/ssh/ssh_host_rsa_key
@@ -84,20 +85,29 @@ root@localhost:/etc/ssh/sshd_config.d#
 - ✅KVMホスト(CentOS6.10)にパスワードなしでSSHできる
 
 ```
+ubuntu@localhost:~$ cat .ssh/config
 Host centos6-8300
-    HostName 10.20.30.40
+    HostName <<centos6-8300のIPアドレス>>
     User root
-    IdentityFile ~/.ssh/id_rsa_centos6
-    Port 22
+    IdentityFile ~/.ssh/id_rsa_centos6-8300
     HostKeyAlgorithms +ssh-rsa
     PubkeyAcceptedAlgorithms +ssh-rsa
     IdentitiesOnly yes
     ServerAliveInterval 60
+ubuntu@localhost:~$
 ```
-鍵はわざと古い形式で作らないと受け入れてくれない
+鍵はわざと古い形式で作らないと受け入れてくれない　エラーが出るわけではないが、鍵を向こうに置いてきてもパスワードを求められる
 ```
-ssh-keygen -t rsa -b 4096 -f ./id_rsa_centos6
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa_centos6-8300
 ```
+古い鍵を置きに行く
+```
+ssh-copy-id centos6-8300
+```
+✅パスワードなしでSSHできるようになる
+
+
+
 
 ## RHEL10に変換ツールを入れる
 
@@ -137,7 +147,7 @@ sudo subscription-manager repos \
 
 virt-v2v / libguestfs をインストール
 ```
-sudo dnf -y install virt-v2v libguestfs-tools-c libvirt-client
+sudo dnf -y install virt-v2v virt-p2v libguestfs-tools-c libvirt-client
 ```
 <img width="722" height="212" alt="image" src="https://github.com/user-attachments/assets/41c7ed7e-9ce9-48ad-b4cc-b6809dda1c70" />
 
@@ -146,8 +156,200 @@ sudo dnf -y install virt-v2v libguestfs-tools-c libvirt-client
 ```
 virt-v2v --version
 guestfish --version
+virt-p2v-make-disk --help
 ```
-<img width="658" height="248" alt="image" src="https://github.com/user-attachments/assets/59fcb7ae-5cbc-4322-9147-8e88d41a43e1" />
+<img width="811" height="275" alt="image" src="https://github.com/user-attachments/assets/df838be7-c5c9-40b8-9f9b-e47a3caa0b8a" />
 
 
+## RHEL10から、CentOS6にvirsh接続テスト
 
+```
+ubuntu@rhel10:~$ virsh -c qemu+ssh://root@centos6-8300/system list --all
+ Id   名前          状態
+----------------------------
+ 1    almalinux10   実行中
+
+ubuntu@rhel10:~$
+```
+
+## centos6-8300 に保存先（ストレージ）を用意
+```
+[root@centos6-8300 images]# pwd
+/var/lib/libvirt/images
+[root@centos6-8300 images]# ls
+CentOS-6.10-DVD1.iso  almalinux10.img
+[root@centos6-8300 images]# mkdir p2v
+```
+
+## rhel10で virt-p2v ISO を作成
+
+エラー
+```
+ubuntu@rhel10:~$ sudo virt-p2v-make-disk --output /tmp/virt-p2v.iso
+[sudo] ubuntu のパスワード:
+virt-builder: error: cannot find os-version ‘rhel-10.0’ with
+architecture ‘x86_64’.
+Use --list to list available guest types.
+
+If reporting bugs, run virt-builder with debugging enabled and include the
+complete output:
+
+  virt-builder -v -x [...]
+```
+
+
+<details>
+    <summary>virt-builder --list</summary>
+
+```
+ubuntu@rhel10:~$ virt-builder --list
+alma-8.5                 x86_64     AlmaLinux 8.5
+centos-6                 x86_64     CentOS 6.6
+centos-7.0               x86_64     CentOS 7.0
+centos-7.1               x86_64     CentOS 7.1
+centos-7.2               aarch64    CentOS 7.2 (aarch64)
+centos-7.2               x86_64     CentOS 7.2
+centos-7.3               x86_64     CentOS 7.3
+centos-7.4               x86_64     CentOS 7.4
+centos-7.5               x86_64     CentOS 7.5
+centos-7.6               x86_64     CentOS 7.6
+centos-7.7               x86_64     CentOS 7.7
+centos-7.8               x86_64     CentOS 7.8
+centos-8.0               x86_64     CentOS 8.0
+centos-8.2               x86_64     CentOS 8.2
+centosstream-8           x86_64     CentOS Stream 8
+centosstream-9           x86_64     CentOS Stream 9
+cirros-0.3.1             x86_64     CirrOS 0.3.1
+cirros-0.3.5             x86_64     CirrOS 0.3.5
+debian-6                 x86_64     Debian 6 (Squeeze)
+debian-7                 sparc64    Debian 7 (Wheezy) (sparc64)
+debian-7                 x86_64     Debian 7 (wheezy)
+debian-8                 x86_64     Debian 8 (jessie)
+debian-9                 x86_64     Debian 9 (stretch)
+debian-10                x86_64     Debian 10 (buster)
+debian-11                x86_64     Debian 11 (bullseye)
+debian-12                x86_64     Debian 12 (bookworm)
+debian-13                x86_64     Debian 13 (trixie)
+fedora-41                x86_64     Fedora® 41 Server
+fedora-41                aarch64    Fedora® 41 Server (aarch64)
+fedora-42                x86_64     Fedora® 42 Server
+freebsd-11.1             x86_64     FreeBSD 11.1
+scientificlinux-6        x86_64     Scientific Linux 6.5
+ubuntu-10.04             x86_64     Ubuntu 10.04 (Lucid)
+ubuntu-12.04             x86_64     Ubuntu 12.04 (Precise)
+ubuntu-14.04             x86_64     Ubuntu 14.04 (Trusty)
+ubuntu-16.04             x86_64     Ubuntu 16.04 (Xenial)
+ubuntu-18.04             x86_64     Ubuntu 18.04 (bionic)
+ubuntu-20.04             x86_64     Ubuntu 20.04 (focal)
+fedora-18                x86_64     Fedora® 18
+fedora-19                x86_64     Fedora® 19
+fedora-20                x86_64     Fedora® 20
+fedora-21                aarch64    Fedora® 21 Server (aarch64)
+fedora-21                armv7l     Fedora® 21 Server (armv7l)
+fedora-21                ppc64      Fedora® 21 Server (ppc64)
+fedora-21                ppc64le    Fedora® 21 Server (ppc64le)
+fedora-21                x86_64     Fedora® 21 Server
+fedora-22                aarch64    Fedora® 22 Server (aarch64)
+fedora-22                armv7l     Fedora® 22 Server (armv7l)
+fedora-22                i686       Fedora® 22 Server (i686)
+fedora-22                x86_64     Fedora® 22 Server
+fedora-23                aarch64    Fedora® 23 Server (aarch64)
+fedora-23                armv7l     Fedora® 23 Server (armv7l)
+fedora-23                i686       Fedora® 23 Server (i686)
+fedora-23                ppc64      Fedora® 23 Server (ppc64)
+fedora-23                ppc64le    Fedora® 23 Server (ppc64le)
+fedora-23                x86_64     Fedora® 23 Server
+fedora-24                aarch64    Fedora® 24 Server (aarch64)
+fedora-24                armv7l     Fedora® 24 Server (armv7l)
+fedora-24                i686       Fedora® 24 Server (i686)
+fedora-24                x86_64     Fedora® 24 Server
+fedora-25                aarch64    Fedora® 25 Server (aarch64)
+fedora-25                armv7l     Fedora® 25 Server (armv7l)
+fedora-25                i686       Fedora® 25 Server (i686)
+fedora-25                ppc64      Fedora® 25 Server (ppc64)
+fedora-25                ppc64le    Fedora® 25 Server (ppc64le)
+fedora-25                x86_64     Fedora® 25 Server
+fedora-26                aarch64    Fedora® 26 Server (aarch64)
+fedora-26                armv7l     Fedora® 26 Server (armv7l)
+fedora-26                i686       Fedora® 26 Server (i686)
+fedora-26                ppc64      Fedora® 26 Server (ppc64)
+fedora-26                ppc64le    Fedora® 26 Server (ppc64le)
+fedora-26                x86_64     Fedora® 26 Server
+fedora-27                aarch64    Fedora® 27 Server (aarch64)
+fedora-27                armv7l     Fedora® 27 Server (armv7l)
+fedora-27                i686       Fedora® 27 Server (i686)
+fedora-27                ppc64      Fedora® 27 Server (ppc64)
+fedora-27                ppc64le    Fedora® 27 Server (ppc64le)
+fedora-27                x86_64     Fedora® 27 Server
+fedora-28                i686       Fedora® 28 Server (i686)
+fedora-28                x86_64     Fedora® 28 Server
+fedora-29                aarch64    Fedora® 29 Server (aarch64)
+fedora-29                i686       Fedora® 29 Server (i686)
+fedora-29                ppc64le    Fedora® 29 Server (ppc64le)
+fedora-29                x86_64     Fedora® 29 Server
+fedora-30                aarch64    Fedora® 30 Server (aarch64)
+fedora-30                i686       Fedora® 30 Server (i686)
+fedora-30                x86_64     Fedora® 30 Server
+fedora-31                x86_64     Fedora® 31 Server
+fedora-32                x86_64     Fedora® 32 Server
+fedora-33                x86_64     Fedora® 33 Server
+fedora-34                x86_64     Fedora® 34 Server
+fedora-34                armv7l     Fedora® 34 Server (armv7l)
+fedora-35                x86_64     Fedora® 35 Server
+fedora-35                aarch64    Fedora® 35 Server (aarch64)
+fedora-36                x86_64     Fedora® 36 Server
+fedora-37                x86_64     Fedora® 37 Server
+fedora-38                x86_64     Fedora® 38 Server
+fedora-38                aarch64    Fedora® 38 Server (aarch64)
+fedora-39                x86_64     Fedora® 39 Server
+fedora-40                x86_64     Fedora® 40 Server
+ubuntu@rhel10:~$
+```
+
+</details>
+
+-> 最も近い、centosstream-9 は選べず
+```
+ubuntu@rhel10:~$ sudo virt-p2v-make-disk --output /tmp/virt-p2v.iso centosstream-9
+[sudo] ubuntu のパスワード:
+virt-p2v-make-disk: internal error: could not work out the Linux distro from 'centosstream-9'
+```
+
+fedora42を選らぶ
+```
+ubuntu@rhel10:~$ sudo virt-p2v-make-disk --output /tmp/virt-p2v.iso fedora-42
+[   3.5] Downloading: https://builder.libguestfs.org/fedora-42.xz
+################################################################################################################# 100.0%
+[ 226.2] Planning how to build this image
+[ 226.2] Uncompressing
+[ 230.2] Opening the new disk
+[ 250.5] Setting a random seed
+[ 250.5] Setting the hostname: p2v.local
+[ 250.5] Running: hostname p2v.local
+[ 250.6] Updating packages
+[ 393.0] Installing packages: pcre2 libxml2 librsvg2 gtk3 dbus-libs /usr/bin/ssh nbdkit-server nbdkit-file-plugin which vim-minimal iscsi-initiator-utils /usr/bin/xinit /usr/bin/Xorg xorg-x11-drivers xorg-x11-fonts-Type1 dejavu-sans-fonts dejavu-sans-mono-fonts mesa-dri-drivers metacity NetworkManager nm-connection-editor network-manager-applet dbus-x11 net-tools @hardware-support shim-x64 grub2-efi-x64-cdboot curl ethtool gawk lsscsi pciutils usbutils util-linux xterm less hwdata hdparm smartmontools
+[ 449.6] Uploading: /usr/share/virt-p2v/issue to /etc/issue
+[ 449.6] Uploading: /usr/share/virt-p2v/issue to /etc/issue.net
+[ 449.7] Making directory: /usr/bin
+[ 449.7] Uploading: /tmp/tmp.1OFoOWtmQx/virt-p2v to /usr/bin/virt-p2v
+[ 449.7] Changing permissions of /usr/bin/virt-p2v to 0755
+[ 449.7] Uploading: /usr/share/virt-p2v/launch-virt-p2v to /usr/bin/
+[ 449.7] Changing permissions of /usr/bin/launch-virt-p2v to 0755
+[ 449.7] Uploading: /usr/share/virt-p2v/p2v.service to /etc/systemd/system/
+[ 449.7] Making directory: /etc/systemd/system/multi-user.target.wants
+[ 449.7] Linking: /etc/systemd/system/multi-user.target.wants/p2v.service -> /etc/systemd/system/p2v.service
+[ 449.7] Editing: /lib/systemd/system/getty@.service
+[ 449.8] Copying (in image): /usr/lib/systemd/logind.conf to /etc/systemd/logind.conf
+[ 449.8] Editing: /etc/systemd/logind.conf
+[ 449.8] Uploading: /tmp/tmp.1OFoOWtmQx/p2v.conf to /etc/dracut.conf.d/
+[ 449.8] Running: /tmp/tmp.1OFoOWtmQx/post-install
+[ 468.1] Setting passwords
+[ 468.8] SELinux relabelling
+[ 470.5] Finishing off
+                   Output file: /tmp/virt-p2v.iso
+                   Output size: 6.0G
+                 Output format: raw
+            Total usable space: 5.9G
+                    Free space: 2.5G (42%)
+ubuntu@rhel10:~$
+```
