@@ -39,13 +39,13 @@ CentOS6.10は、/ に40GB残ってる
 
 RHEL 9や10では、セキュリティを確保するために古い暗号がシステムレベルで封じられています。これを一時的に解除します。（以下をRHEL10で実行）
 ```
-ubuntu@localhost:~$ sudo update-crypto-policies --set LEGACY
+ubuntu@rhel10:~$ sudo update-crypto-policies --set LEGACY
 [sudo] ubuntu のパスワード:
 Setting system policy to LEGACY
 Note: System-wide crypto policies are applied on application start-up.
 It is recommended to restart the system for the change of policies
 to fully take place.
-ubuntu@localhost:~$
+ubuntu@rhel10:~$
 ```
 ※⚠上記だけでは解決せず、以下が必要になるが、上記がないと、以下をやっても　no kex algが出るので、上記は必要です
 
@@ -55,15 +55,15 @@ ubuntu@localhost:~$
 
 以下をRHEL10で実行
 ```
-root@localhost:/etc/ssh/sshd_config.d# cat 05-hostkey-legacy.conf
+ubuntu@rhel10:/etc/ssh/sshd_config.d# cat 05-hostkey-legacy.conf
 HostKey /etc/ssh/ssh_host_rsa_key
 HostKeyAlgorithms +ssh-rsa
-root@localhost:/etc/ssh/sshd_config.d# cat 10-centos5-compat.conf
+ubuntu@rhel10:/etc/ssh/sshd_config.d# cat 10-centos5-compat.conf
 Match Address <<CentOS5.11のIPアドレス>>
     PubkeyAcceptedAlgorithms +ssh-rsa
-root@localhost:/etc/ssh/sshd_config.d# sshd -t
-root@localhost:/etc/ssh/sshd_config.d# systemctl restart sshd
-root@localhost:/etc/ssh/sshd_config.d#
+ubuntu@rhel10:/etc/ssh/sshd_config.d# sshd -t
+ubuntu@rhel10:/etc/ssh/sshd_config.d# systemctl restart sshd
+ubuntu@rhel10:/etc/ssh/sshd_config.d#
 ```
 -> SSHできるようになるので、鍵を置く
 
