@@ -463,3 +463,9 @@ time dd if=/root/dd_test.bin of=/dev/null bs=1M iflag=direct status=progress
 
 <img width="855" height="78" alt="image" src="https://github.com/user-attachments/assets/7cc3f85a-dabe-4702-a675-82939e7509e0" />
 <img width="1021" height="128" alt="image" src="https://github.com/user-attachments/assets/eef401a2-2645-4f1e-87bd-0bf12da5f8e1" />
+
+
+
+CentOS5を停止
+
+<img width="383" height="28" alt="image" src="https://github.com/user-attachments/assets/d4e45600-4a82-4632-b9dc-c1908b776824" />
