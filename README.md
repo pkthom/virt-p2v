@@ -4,7 +4,7 @@
 
 物理のCentOS5.11[(こちらで構築)](https://github.com/pkthom/centos_5.11)を、CentOS6.10(KVMホスト)[(こちらで構築)](https://github.com/pkthom/centos_6.10)にp2vする
 
-<img width="834" height="721" alt="image" src="https://github.com/user-attachments/assets/778c3e26-a086-478d-96e0-c8319a042dea" />
+<img width="682" height="721" alt="image" src="https://github.com/user-attachments/assets/7e037970-cd80-4671-a515-7bdc6ff0a27b" />
 
 
 # 目次
@@ -490,7 +490,8 @@ cluster_size: 65536
 
 KVMホストGUIのvirt-managerからもVMが見えている
 
-<img width="834" height="721" alt="image" src="https://github.com/user-attachments/assets/f7b30f54-0388-47c3-be7a-06cfe81d521a" />
+<img width="682" height="721" alt="image" src="https://github.com/user-attachments/assets/f9d22edd-9840-4d19-b964-26b6d3c8c95f" />
+
 
 ## テスト
 
