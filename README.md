@@ -4,6 +4,48 @@ CentOS5.11[(こちらで構築)](https://github.com/pkthom/centos_5.11)の物理
 
 ## 事前チェック
 
+<details>
+  <summary>p2v前パフォーマンステスト</summary>
+
+### 書き込みテスト
+```
+sync
+time dd if=/dev/zero of=/root/dd_test.bin bs=1M count=8192 oflag=direct conv=fdatasync
+rm -f /root/dd_test.bin
+```
+※解説
+```
+if=/dev/zero: 入力元。中身がゼロの無限データを読み込みます。
+of=/root/dd_test.bin: 出力先。/root ディレクトリにテスト用の大きなファイルを作ります。
+bs=1M: ブロックサイズ。1回につき 1MB ずつ書き込みます。
+count=1024: 回数。8192回繰り返すので、合計 8GB のファイルを書き込むことになります。
+conv=fdatasync: 重要。 OSのキャッシュ（メモリ）に書き込んだ時点で「終わり」とせず、物理的なディスクにデータが書き込まれるまで待機します。これにより、本当のディスク性能が測れます。
+```
+※sync -> OSがメモリ上に溜めている「未書き込みデータ（dirty page）」をディスクへ書き出させる
+
+<img width="1204" height="726" alt="image" src="https://github.com/user-attachments/assets/88866108-4441-419d-8c75-875d78aced43" />
+<img width="1202" height="483" alt="image" src="https://github.com/user-attachments/assets/e570b58f-f263-4aa6-936b-4ab7b33a8b98" />
+
+### 読み取りテスト
+```
+sync
+echo 3 > /proc/sys/vm/drop_caches
+time dd if=/root/dd_test.bin of=/dev/null bs=1M iflag=direct status=progress
+```
+※`echo 3 > /proc/sys/vm/drop_caches` -> Linuxのページキャッシュ等（読み込みキャッシュ）を捨てる
+
+<img width="1146" height="723" alt="image" src="https://github.com/user-attachments/assets/d7f419d3-5aca-42d7-858f-ac4d67612212" />
+<img width="920" height="483" alt="image" src="https://github.com/user-attachments/assets/a7b25e2a-dbde-4747-90d0-199690711d18" />
+
+## 内容テスト
+
+マーカー作成
+
+<img width="855" height="78" alt="image" src="https://github.com/user-attachments/assets/7cc3f85a-dabe-4702-a675-82939e7509e0" />
+<img width="1021" height="128" alt="image" src="https://github.com/user-attachments/assets/eef401a2-2645-4f1e-87bd-0bf12da5f8e1" />
+
+</details>
+
 ## ISO作成機 (RHEL10)を準備
 
 バイナリをバックアップ（今から差し替えるため）
@@ -227,57 +269,24 @@ sudo virsh -c qemu:///system pool-list --all
 
 <img width="1536" height="1152" alt="image" src="https://github.com/user-attachments/assets/c1bd45e6-4c89-4bbd-b3df-b00609416aeb" />
 
-
-## パフォーマンステスト
-
-### p2v前
-
-### 書き込みテスト
+なぜかalma8側にp2vされていたので、イメージを手動でCentOS6にコピーする
 ```
-sync
-time dd if=/dev/zero of=/root/dd_test.bin bs=1M count=8192 oflag=direct conv=fdatasync
-rm -f /root/dd_test.bin
+[root@alma8 ~]# scp /var/lib/libvirt/images/centos5-p2v-sda root@<<CentOS6のIP>>:/var/lib/libvirt/images/
 ```
-※解説
+
+起動
 ```
-if=/dev/zero: 入力元。中身がゼロの無限データを読み込みます。
-of=/root/dd_test.bin: 出力先。/root ディレクトリにテスト用の大きなファイルを作ります。
-bs=1M: ブロックサイズ。1回につき 1MB ずつ書き込みます。
-count=1024: 回数。8192回繰り返すので、合計 8GB のファイルを書き込むことになります。
-conv=fdatasync: 重要。 OSのキャッシュ（メモリ）に書き込んだ時点で「終わり」とせず、物理的なディスクにデータが書き込まれるまで待機します。これにより、本当のディスク性能が測れます。
+[root@centos6-8300 ~]# virsh start centos5-p2v
+ドメイン centos5-p2v が起動されました
+[root@centos6-8300 ~]#
 ```
-※sync -> OSがメモリ上に溜めている「未書き込みデータ（dirty page）」をディスクへ書き出させる
+接続する
 
-<img width="1204" height="726" alt="image" src="https://github.com/user-attachments/assets/88866108-4441-419d-8c75-875d78aced43" />
-<img width="1202" height="483" alt="image" src="https://github.com/user-attachments/assets/e570b58f-f263-4aa6-936b-4ab7b33a8b98" />
-
-### 読み取りテスト
+以下のため、ポートは5900　※１なら5901
 ```
-sync
-echo 3 > /proc/sys/vm/drop_caches
-time dd if=/root/dd_test.bin of=/dev/null bs=1M iflag=direct status=progress
+[root@centos6-8300 ~]# virsh vncdisplay centos5-p2v
+:0
 ```
-※`echo 3 > /proc/sys/vm/drop_caches` -> Linuxのページキャッシュ等（読み込みキャッシュ）を捨てる
-
-<img width="1146" height="723" alt="image" src="https://github.com/user-attachments/assets/d7f419d3-5aca-42d7-858f-ac4d67612212" />
-<img width="920" height="483" alt="image" src="https://github.com/user-attachments/assets/a7b25e2a-dbde-4747-90d0-199690711d18" />
-
-## 内容テスト
-
-マーカー作成
-
-<img width="855" height="78" alt="image" src="https://github.com/user-attachments/assets/7cc3f85a-dabe-4702-a675-82939e7509e0" />
-<img width="1021" height="128" alt="image" src="https://github.com/user-attachments/assets/eef401a2-2645-4f1e-87bd-0bf12da5f8e1" />
-
-
-
-CentOS5を停止
-
-
-<img width="465" height="372" alt="image" src="https://github.com/user-attachments/assets/2d3fbff4-2286-4504-a658-5699ab6854d0" />
-
-
-
 TigerVNCをダウンロード
 
 https://sourceforge.net/projects/tigervnc/
@@ -286,6 +295,81 @@ VMにアクセス
 
 <img width="568" height="218" alt="image" src="https://github.com/user-attachments/assets/8f703082-3656-4fea-bdda-4074e2bb9ac2" />
 
-アクセスできる
+接続できたが、no bootable device のエラー
+
+<img width="719" height="381" alt="image" src="https://github.com/user-attachments/assets/8a2eecbd-4a5c-4575-8121-cb126ff52f18" />
+
+原因わかりました。CentOS6 側の qemu が “QCOW2 v3” を読めません。
+```
+[root@centos6-8300 ~]# qemu-img info /var/lib/libvirt/images/centos5-p2v-sda
+'image' uses a qcow2 feature which is not supported by this qemu version: QCOW version 3
+Could not open '/var/lib/libvirt/images/centos5-p2v-sda': Operation not supported
+[root@centos6-8300 ~]#
+```
+最短の解決策：QCOW2 v2（compat=0.10）に変換して差し替え
+
+VM停止
+```
+virsh shutdown centos5-p2v || virsh destroy centos5-p2v
+```
+
+Alma8側で修理　VMイメージを再度持ってくる
+```
+[root@alma8 ~]# mkdir -p /root/p2vfix
+[root@alma8 ~]# cd p2vfix/
+[root@alma8 p2vfix]# scp root@centos6:/var/lib/libvirt/images/centos5-p2v-sda .
+centos5-p2v-sda                                                                       100% 1759MB 108.3MB/s   00:16
+```
+qcow2 v2へ変換
+```
+[root@alma8 p2vfix]# qemu-img convert -p \
+>   -O qcow2 -o compat=0.10 \
+>   centos5-p2v-sda centos5-p2v-sda.qcow2v2
+    (100.00/100%)
+[root@alma8 p2vfix]# qemu-img info centos5-p2v-sda.qcow2v2
+image: centos5-p2v-sda.qcow2v2
+file format: qcow2
+virtual size: 112 GiB (120034123776 bytes)
+disk size: 1.72 GiB
+cluster_size: 65536
+Format specific information:
+    compat: 0.10
+    compression type: zlib
+    refcount bits: 16
+[root@alma8 p2vfix]# 
+```
+修理済みイメージを戻す
+```
+[root@alma8 p2vfix]# scp centos5-p2v-sda.qcow2v2 root@centos6:/var/lib/libvirt/images/
+centos5-p2v-sda.qcow2v2                                                               100% 1759MB 111.7MB/s   00:15
+[root@alma8 p2vfix]#
+```
+
+CentOS6 側で所有者を合わせる：
+```
+[root@centos6-8300 ~]# chown qemu:qemu /var/lib/libvirt/images/centos5-p2v-sda.qcow2v2
+[root@centos6-8300 ~]# chmod 644 /var/lib/libvirt/images/centos5-p2v-sda.qcow2v2
+```
+CentOS6側で読み込めているか確認
+```
+[root@centos6-8300 ~]# qemu-img info /var/lib/libvirt/images/centos5-p2v-sda.qcow2v2
+image: /var/lib/libvirt/images/centos5-p2v-sda.qcow2v2
+file format: qcow2
+virtual size: 112G (120034123776 bytes)
+disk size: 1.7G
+cluster_size: 65536
+[root@centos6-8300 ~]#
+```
+修正版を参照するように、以下2行だけ変更
+```
+[root@centos6-8300 ~]# virsh edit centos5-p2v
+      <driver name='qemu' type='qcow2' cache='none'/>
+      <source file='/var/lib/libvirt/images/centos5-p2v-sda.qcow2v2'/>
+```
+```
+[root@centos6-8300 ~]# virsh start centos5-p2v
+```
+
+アクセスできた
 
 <img width="901" height="538" alt="image" src="https://github.com/user-attachments/assets/d82d8be3-8fa6-461c-8e3b-1427d95b2b96" />
