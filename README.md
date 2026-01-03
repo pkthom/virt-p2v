@@ -1,6 +1,11 @@
 # virt-p2v
 
-CentOS5.11[(こちらで構築)](https://github.com/pkthom/centos_5.11)の物理マシンを、CentOS6.10(KVMホスト)[(こちらで構築)](https://github.com/pkthom/centos_6.10)にp2vする
+### 目標：
+
+物理のCentOS5.11[(こちらで構築)](https://github.com/pkthom/centos_5.11)を、CentOS6.10(KVMホスト)[(こちらで構築)](https://github.com/pkthom/centos_6.10)にp2vする
+
+<img width="834" height="721" alt="image" src="https://github.com/user-attachments/assets/778c3e26-a086-478d-96e0-c8319a042dea" />
+
 
 # 目次
 
