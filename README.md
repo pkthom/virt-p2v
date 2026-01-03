@@ -2,6 +2,19 @@
 
 CentOS5.11[(こちらで構築)](https://github.com/pkthom/centos_5.11)の物理マシンを、CentOS6.10(KVMホスト)[(こちらで構築)](https://github.com/pkthom/centos_6.10)にp2vする
 
+# 目次
+
+- [事前準備]()
+  - [ISO作成機(RHEL10)と、ISO入りUSBの準備]()
+  - [virt-v2vホスト(almalinux8)の準備]()
+  - [P2V対象側(CentOS5.11)の準備]()
+  - [KVMホスト(CentOS6.10)の準備]()
+- [P2V]()
+  - [virt-p2v ISOからCentOS5を起動]()
+  - [virt-p2v]()
+  - [p2v後VMに接続]()
+  - [テスト]()
+
 # 事前準備
 
 <details>
@@ -50,7 +63,90 @@ time dd if=/root/dd_test.bin of=/dev/null bs=1M iflag=direct
 
 まずVMを(こちら)[https://github.com/pkthom/rhel10/blob/main/README.md]に沿って構築
 
-バイナリをバックアップ（今から差し替えるため）
+※最初はRHEL10をvirt-v2vホストにしようと思ったが、[下記の通り、]()virt-v2vのバージョンが新しすぎて無理だった
+
+<details>
+  <summary>-> 結果的に不要だったが、CentOS6へのSSH設定はこちら</summary>
+
+CentOS6にパスワードなしでSSHできる必要がある
+```
+ubuntu@localhost:~$ cat .ssh/config
+Host centos6-8300
+    HostName <<centos6-8300のIPアドレス>>
+    User root
+    IdentityFile ~/.ssh/id_rsa_centos6-8300
+    HostKeyAlgorithms +ssh-rsa
+    PubkeyAcceptedAlgorithms +ssh-rsa
+    IdentitiesOnly yes
+    ServerAliveInterval 60
+ubuntu@localhost:~$
+```
+鍵はわざと古い形式で作らないと、CentOS6が受け入れてくれない　エラーが出るわけではないが、鍵を向こうに置いてきてもパスワードを求められる
+```
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa_centos6-8300
+ssh-copy-id centos6-8300
+```
+
+</details>
+
+### 諸ツールのインストール
+
+登録がないと、最初レポジトリが使えない
+
+<img width="1576" height="251" alt="image" src="https://github.com/user-attachments/assets/38a02dff-b7d9-4125-87bb-11293a83a99a" />
+
+以下で登録
+```
+sudo subscription-manager register --username 'ユーザー名' --password 'パスワード'
+```
+登録済みなことを確認
+
+<img width="727" height="222" alt="image" src="https://github.com/user-attachments/assets/abc98050-ed85-4a47-a1f3-e13e420a2071" />
+
+こちらでも確認
+```
+sudo subscription-manager identity || true
+```
+
+BaseOS/AppStream を有効化
+```
+sudo subscription-manager repos \
+  --enable=rhel-10-for-x86_64-baseos-rpms \
+  --enable=rhel-10-for-x86_64-appstream-rpms
+```
+<img width="1178" height="168" alt="image" src="https://github.com/user-attachments/assets/73989fbc-4468-46e3-9cb8-2085c5b524b6" />
+
+有効になったことを確認
+
+<img width="1448" height="225" alt="image" src="https://github.com/user-attachments/assets/5de9cfdf-4a40-488a-a55c-c1304d397a20" />
+
+virt-v2v / libguestfs をインストール
+```
+sudo dnf -y install virt-v2v virt-p2v libguestfs-tools-c libvirt-client
+```
+<img width="722" height="212" alt="image" src="https://github.com/user-attachments/assets/05f951e1-c4e8-4849-a4a3-90c0c2d8eeef" />
+
+インストールできたことを確認
+
+<img width="811" height="275" alt="image" src="https://github.com/user-attachments/assets/50ccf87d-12ea-4a79-bedb-724852506ea8" />
+
+<details>
+  <summary>-> 結果的に不要だったが、CentOS6へのVirsh接続テスト</summary>
+
+```
+ubuntu@rhel10:~$ virsh -c qemu+ssh://root@centos6-8300/system list --all
+ Id   名前          状態
+----------------------------
+ 1    almalinux10   実行中
+
+ubuntu@rhel10:~$
+```
+
+</details>
+
+### virt-p2vを改造
+
+virt-p2vのバイナリをバックアップ（今から差し替えるため）
 ```
 ubuntu@rhel10:~$ cd /usr/lib64/virt-p2v/
 ubuntu@rhel10:/usr/lib64/virt-p2v$ ls
@@ -139,8 +235,9 @@ Host centos6
 ### virt-v2v等をインストール
 
 ```
-[root@alma8 ~]# sudo dnf -y install virt-v2v libguestfs-tools-c libvirt-client　virt-p2v-maker
+[root@alma8 ~]# sudo dnf -y install virt-v2v libguestfs-tools-c libvirt-client
 ```
+※virt-p2v ISOは作成済みなので、virt-p2vは不要　もしこちらで作りたければ `virt-p2v-maker`をインストールする virt-p2vは無かった
 ```
 [root@alma8 ~]# virt-v2v --version
 virt-v2v 1.42.0rhel=8,release=22.module_el8.9.0+3659+9c8643f3
@@ -194,7 +291,7 @@ CentOS-6.10-DVD1.iso  almalinux10.img
 [root@centos6-8300 images]# mkdir p2v
 ```
 
-# 手順
+# P2V
 
 
 
