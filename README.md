@@ -4,16 +4,16 @@ CentOS5.11[(こちらで構築)](https://github.com/pkthom/centos_5.11)の物理
 
 # 目次
 
-- [事前準備]()
-  - [ISO作成機(RHEL10)と、ISO入りUSBの準備]()
-  - [virt-v2vホスト(almalinux8)の準備]()
-  - [P2V対象側(CentOS5.11)の準備]()
-  - [KVMホスト(CentOS6.10)の準備]()
-- [P2V]()
-  - [virt-p2v ISOからCentOS5を起動]()
-  - [virt-p2v]()
-  - [p2v後VMに接続]()
-  - [テスト]()
+- [事前準備](https://github.com/pkthom/virt-p2v/blob/main/README.md#%E4%BA%8B%E5%89%8D%E6%BA%96%E5%82%99)
+  - [ISO作成機(RHEL10)と、ISO入りUSBの準備](https://github.com/pkthom/virt-p2v/blob/main/README.md#iso%E4%BD%9C%E6%88%90%E6%A9%9Frhel10%E3%81%A8iso%E5%85%A5%E3%82%8Ausb%E3%81%AE%E6%BA%96%E5%82%99)
+  - [virt-v2vホスト(almalinux8)の準備](https://github.com/pkthom/virt-p2v/blob/main/README.md#virt-v2v%E3%83%9B%E3%82%B9%E3%83%88almalinux8%E3%81%AE%E6%BA%96%E5%82%99)
+  - [P2V対象側(CentOS5.11)の準備](https://github.com/pkthom/virt-p2v/blob/main/README.md#p2v%E5%AF%BE%E8%B1%A1%E5%81%B4centos511%E3%81%AE%E6%BA%96%E5%82%99)
+  - [KVMホスト(CentOS6.10)の準備](https://github.com/pkthom/virt-p2v/blob/main/README.md#kvm%E3%83%9B%E3%82%B9%E3%83%88centos610%E3%81%AE%E6%BA%96%E5%82%99)
+- [P2V](https://github.com/pkthom/virt-p2v/blob/main/README.md#p2v)
+  - [virt-p2v ISOからCentOS5を起動](https://github.com/pkthom/virt-p2v/blob/main/README.md#virt-p2v-iso%E3%81%8B%E3%82%89centos5%E3%82%92%E8%B5%B7%E5%8B%95)
+  - [virt-p2v](https://github.com/pkthom/virt-p2v/blob/main/README.md#virt-p2v-1)
+  - [p2v後VMに接続](https://github.com/pkthom/virt-p2v/blob/main/README.md#p2v%E5%BE%8Cvm%E3%81%AB%E6%8E%A5%E7%B6%9A)
+  - [テスト](https://github.com/pkthom/virt-p2v/blob/main/README.md#%E3%83%86%E3%82%B9%E3%83%88)
 
 # 事前準備
 
@@ -63,7 +63,7 @@ time dd if=/root/dd_test.bin of=/dev/null bs=1M iflag=direct
 
 まずVMを(こちら)[https://github.com/pkthom/rhel10/blob/main/README.md]に沿って構築
 
-※最初はRHEL10をvirt-v2vホストにしようと思ったが、[下記の通り、]()virt-v2vのバージョンが新しすぎて無理だった
+※最初はRHEL10をvirt-v2vホストにしようと思ったが、[下記の通り、](https://github.com/pkthom/virt-p2v/blob/main/README.md#virt-p2v-1)virt-v2vのバージョンが新しすぎて無理だった なので[以下で](https://github.com/pkthom/virt-p2v/blob/main/README.md#virt-v2v%E3%83%9B%E3%82%B9%E3%83%88almalinux8%E3%81%AE%E6%BA%96%E5%82%99)virt-v2vホストとしてAlmaLinux8を用意している
 
 <details>
   <summary>-> 結果的に不要だったが、CentOS6へのSSH設定はこちら</summary>
