@@ -315,7 +315,7 @@ ubuntu@rhel10:~$ sudo virt-p2v-make-disk --output /tmp/virt-p2v.iso centosstream
 virt-p2v-make-disk: internal error: could not work out the Linux distro from 'centosstream-9'
 ```
 
-fedora42を選らぶ
+fedora42を選ぶ
 ```
 ubuntu@rhel10:~$ sudo virt-p2v-make-disk --output /tmp/virt-p2v.iso fedora-42
 [   3.5] Downloading: https://builder.libguestfs.org/fedora-42.xz
@@ -422,6 +422,74 @@ ubuntu@rhel10:~$
 VMからUSBをデタッチ
 
 <img width="782" height="548" alt="image" src="https://github.com/user-attachments/assets/bdbece62-dfec-4d1b-89f9-bca605b9a45d" />
+
+USBをCentOS5物理マシンにさして、F12でGRUB起動　USBを選択して起動
+
+ログインできたが、GUI launch-virt-p2v が起動しない　
+
+CPU ISA level lower than required とある　物理マシンのCPUが、Fedora42 にとって古すぎるようです
+
+centos-7.8 でISO作り直す　→　こちらもエラー `mirrorlist.centos.org` が使えないらしい
+```
+ubuntu@rhel10:~$ sudo virt-p2v-make-disk --output /tmp/virt-p2v.iso centos-7.8
+[   4.2] Downloading: https://builder.libguestfs.org/centos-7.8.xz
+################################################################################################################# 100.0%
+[  77.7] Planning how to build this image
+[  77.7] Uncompressing
+[  80.8] Opening the new disk
+[  95.1] Setting a random seed
+[  95.2] Setting the hostname: p2v.local
+[  95.2] Running: hostname p2v.local
+[  95.2] Updating packages
+Loaded plugins: fastestmirror
+Determining fastest mirrors
+Could not retrieve mirrorlist http://mirrorlist.centos.org/?release=7&arch=x86_64&repo=os&infra=stock error was
+14: curl#6 - "Could not resolve host: mirrorlist.centos.org; Unknown error"
+
+```
+ubuntu-20.04もエラー
+```
+ubuntu@rhel10:~$ sudo virt-p2v-make-disk --output /tmp/virt-p2v.iso ubuntu-20.04
+...
+[ 279.6] Editing: /lib/systemd/system/getty@.service
+[ 279.6] Copying (in image): /usr/lib/systemd/logind.conf to /etc/systemd/logind.conf
+virt-builder: error: libguestfs error: cp_a: cp: cannot stat
+'/sysroot/usr/lib/systemd/logind.conf': No such file or directory
+
+If reporting bugs, run virt-builder with debugging enabled and include the
+complete output:
+
+  virt-builder -v -x [...]
+```
+debian-11 もエラー
+```
+ubuntu@rhel10:~$ sudo virt-p2v-make-disk --output /tmp/virt-p2v.iso debian-12
+...
+Processing triggers for ca-certificates (20230311+deb12u1) ...
+Updating certificates in /etc/ssl/certs...
+0 added, 0 removed; done.
+Running hooks in /etc/ca-certificates/update.d...
+done.
+Errors were encountered while processing:
+ grub-pc
+E: Sub-process /usr/bin/dpkg returned an error code (1)
+virt-builder: error:
+      export DEBIAN_FRONTEND=noninteractive
+      apt_opts='-q -y -o Dpkg::Options::=--force-confnew'
+      apt-get $apt_opts update
+      apt-get $apt_opts upgrade
+    : command exited with an error
+
+If reporting bugs, run virt-builder with debugging enabled and include the
+complete output:
+
+  virt-builder -v -x [...]
+```
+
+fedora40を選ぶ
+```
+
+```
 
 ## パフォーマンステスト
 
