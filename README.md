@@ -373,3 +373,7 @@ cluster_size: 65536
 アクセスできた
 
 <img width="901" height="538" alt="image" src="https://github.com/user-attachments/assets/d82d8be3-8fa6-461c-8e3b-1427d95b2b96" />
+
+KVMホストGUIのvirt-managerからもVMが見えている
+
+<img width="834" height="721" alt="image" src="https://github.com/user-attachments/assets/f7b30f54-0388-47c3-be7a-06cfe81d521a" />
