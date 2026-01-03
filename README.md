@@ -537,3 +537,6 @@ time dd if=/root/dd_test.bin of=/dev/null bs=1M iflag=direct status=progress
 CentOS5を停止
 
 <img width="383" height="28" alt="image" src="https://github.com/user-attachments/assets/d4e45600-4a82-4632-b9dc-c1908b776824" />
+
+
+<img width="465" height="372" alt="image" src="https://github.com/user-attachments/assets/2d3fbff4-2286-4504-a658-5699ab6854d0" />
