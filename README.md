@@ -2,7 +2,7 @@
 
 CentOS5.11[(こちらで構築)](https://github.com/pkthom/centos_5.11)の物理マシンを、CentOS6.10(KVMホスト)[(こちらで構築)](https://github.com/pkthom/centos_6.10)にp2vする
 
-## 事前チェック
+# 事前準備
 
 <details>
   <summary>p2v前パフォーマンステスト</summary>
@@ -46,7 +46,9 @@ time dd if=/root/dd_test.bin of=/dev/null bs=1M iflag=direct
 
 </details>
 
-## ISO作成機 (RHEL10)を準備
+## ISO作成機(RHEL10)と、ISO入りUSBの準備
+
+まずVMを(こちら)[https://github.com/pkthom/rhel10/blob/main/README.md]に沿って構築
 
 バイナリをバックアップ（今から差し替えるため）
 ```
@@ -93,7 +95,7 @@ OK
 
 ![IMG_1108](https://github.com/user-attachments/assets/c360269c-398b-48db-b88d-3e4166c78a42)
 
-## virt-v2vホスト(almalinux8)
+## virt-v2vホスト(almalinux8)の準備
 
 ### VMを作成
 
@@ -143,7 +145,10 @@ Host centos6
 [root@alma8 ~]# virt-v2v --version
 virt-v2v 1.42.0rhel=8,release=22.module_el8.9.0+3659+9c8643f3
 ```
-落ちてるので、あげておく
+
+### Libvirtdが起動、KVMホストへの接続確認
+
+デフォルトで落ちていたので上げておく
 ```
 [root@alma8 ~]# systemctl start libvirtd
 ```
@@ -156,19 +161,20 @@ CentOS6へ接続確認　OK
 ```
 
 
-## P2V対象側(CentOS5.11)チェック
+## P2V対象側(CentOS5.11)の準備
 
 ### KVMホスト(CentOS6.10)とvirt-v2vホスト(almalinux8)にパスワードなしでSSHできるようにしておく
 
 <img width="465" height="372" alt="image" src="https://github.com/user-attachments/assets/2d3fbff4-2286-4504-a658-5699ab6854d0" />
 
 
-## 受け入れ側(CentOS6.10)チェック
+## KVMホスト(CentOS6.10)の準備
 
-- ✅KVM/Libvirtは動いている
+### KVM/Libvirtは動いていることを確認
+
 <img width="629" height="199" alt="image" src="https://github.com/user-attachments/assets/7bd95b2e-327c-4a83-ab23-7b25a2b4b1bf" />
 
-- ✅受け入れられるだけの容量がある
+### CentOS5物理を受け入れられるだけの容量があることを確認
 
 CentOS5.11は、1.6G
 
@@ -178,25 +184,8 @@ CentOS6.10は、/ に40GB残ってる
 
 <img width="657" height="222" alt="image" src="https://github.com/user-attachments/assets/0aa8bad5-d848-4aaf-9e55-e86e936cd961" />
 
+### centos6-8300 に保存先（ストレージ）を用意
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## centos6-8300 に保存先（ストレージ）を用意
 ```
 [root@centos6-8300 images]# pwd
 /var/lib/libvirt/images
@@ -205,7 +194,25 @@ CentOS-6.10-DVD1.iso  almalinux10.img
 [root@centos6-8300 images]# mkdir p2v
 ```
 
-## virt-p2v ISO　からCentOS5を起動
+# 手順
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## virt-p2v ISOからCentOS5を起動
 
 libpcre.so.1 がない　というエラー
 
@@ -218,6 +225,8 @@ libpcre.so.1 がない　というエラー
 インストール後、`launch-virt-p2v` でGUI起動
 
 ![IMG_1127](https://github.com/user-attachments/assets/0c37f3be-20de-4e83-bc40-9696c43a2144)
+
+## virt-p2v
 
 変換サーバ(rhel10)の virt-v2v が新しすぎて弾かれた　→　※なので今回alma8を用意した↑
 
@@ -280,13 +289,16 @@ sudo virsh -c qemu:///system pool-list --all
 ドメイン centos5-p2v が起動されました
 [root@centos6-8300 ~]#
 ```
-接続する
+
+
+## p2v後VMに接続
 
 以下のため、ポートは5900　※１なら5901
 ```
 [root@centos6-8300 ~]# virsh vncdisplay centos5-p2v
 :0
 ```
+
 TigerVNCをダウンロード
 
 https://sourceforge.net/projects/tigervnc/
@@ -313,7 +325,7 @@ VM停止
 virsh shutdown centos5-p2v || virsh destroy centos5-p2v
 ```
 
-Alma8側で修理　VMイメージを再度持ってくる
+Alma8側で修理する　VMイメージを再度持ってくる
 ```
 [root@alma8 ~]# mkdir -p /root/p2vfix
 [root@alma8 ~]# cd p2vfix/
@@ -378,6 +390,7 @@ KVMホストGUIのvirt-managerからもVMが見えている
 
 <img width="834" height="721" alt="image" src="https://github.com/user-attachments/assets/f7b30f54-0388-47c3-be7a-06cfe81d521a" />
 
+## テスト
 
 <details>
   <summary>p2v後パフォーマンステスト</summary>
