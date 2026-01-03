@@ -30,7 +30,7 @@ conv=fdatasync: 重要。 OSのキャッシュ（メモリ）に書き込んだ�
 ```
 sync
 echo 3 > /proc/sys/vm/drop_caches
-time dd if=/root/dd_test.bin of=/dev/null bs=1M iflag=direct status=progress
+time dd if=/root/dd_test.bin of=/dev/null bs=1M iflag=direct
 ```
 ※`echo 3 > /proc/sys/vm/drop_caches` -> Linuxのページキャッシュ等（読み込みキャッシュ）を捨てる
 
@@ -377,3 +377,30 @@ cluster_size: 65536
 KVMホストGUIのvirt-managerからもVMが見えている
 
 <img width="834" height="721" alt="image" src="https://github.com/user-attachments/assets/f7b30f54-0388-47c3-be7a-06cfe81d521a" />
+
+
+<details>
+  <summary>p2v後パフォーマンステスト</summary>
+
+書き込みテスト
+
+<img width="713" height="340" alt="image" src="https://github.com/user-attachments/assets/c3d25d4d-87fa-461d-af4a-6dacb60e97ec" />
+
+<img width="722" height="356" alt="image" src="https://github.com/user-attachments/assets/b6d6a962-bf0d-4791-bcde-ace751d63b06" />
+
+<img width="718" height="178" alt="image" src="https://github.com/user-attachments/assets/babe629f-d3f4-4ba9-bf6b-6213207d39a8" />
+
+読み取りテスト
+
+<img width="705" height="340" alt="image" src="https://github.com/user-attachments/assets/196049a6-fa91-460f-ae26-af28a5a47ce2" />
+
+<img width="722" height="333" alt="image" src="https://github.com/user-attachments/assets/54ac04b9-c547-4fae-9ba7-38ebec0c5ff3" />
+
+<img width="717" height="177" alt="image" src="https://github.com/user-attachments/assets/e63a20bb-c567-4a95-a87a-6cf5b44ac793" />
+
+マーカー
+
+<img width="509" height="36" alt="image" src="https://github.com/user-attachments/assets/83adbb41-32b0-4415-bbd4-83fbfb719c84" />
+
+
+</details>
