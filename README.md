@@ -61,7 +61,7 @@ time dd if=/root/dd_test.bin of=/dev/null bs=1M iflag=direct
 
 ## ISO作成機(RHEL10)と、ISO入りUSBの準備
 
-まずVMを(こちら)[https://github.com/pkthom/rhel10/blob/main/README.md]に沿って構築
+まずVMを[こちら](https://github.com/pkthom/rhel10/blob/main/README.)に沿って構築
 
 ※最初はRHEL10をvirt-v2vホストにしようと思ったが、[下記の通り、](https://github.com/pkthom/virt-p2v/blob/main/README.md#virt-p2v-1)virt-v2vのバージョンが新しすぎて無理だった なので[以下で](https://github.com/pkthom/virt-p2v/blob/main/README.md#virt-v2v%E3%83%9B%E3%82%B9%E3%83%88almalinux8%E3%81%AE%E6%BA%96%E5%82%99)virt-v2vホストとしてAlmaLinux8を用意している
 
